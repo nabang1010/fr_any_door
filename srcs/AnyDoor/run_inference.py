@@ -267,16 +267,21 @@ if __name__ == '__main__':
     
     for image_name in image_names:
         ref_image_path = os.path.join(test_dir, image_name)
+        print("ref_image_path", ref_image_path)
+        
         tar_image_path = ref_image_path.replace('/cloth/', '/image/')
+        print("tar_image_path", tar_image_path)
+        
         ref_mask_path = ref_image_path.replace('/cloth/','/cloth-mask/')
+        print("ref_mask_path", ref_mask_path)
+        
         tar_mask_path = ref_image_path.replace('/cloth/', '/image-parse-v3/').replace('.jpg','.png')
-
+        print("tar_mask_path", tar_mask_path)
+        
         ref_image = cv2.imread(ref_image_path)
         ref_image = cv2.cvtColor(ref_image, cv2.COLOR_BGR2RGB)
-
         gt_image = cv2.imread(tar_image_path)
         gt_image = cv2.cvtColor(gt_image, cv2.COLOR_BGR2RGB)
-
         ref_mask = (cv2.imread(ref_mask_path) > 128).astype(np.uint8)[:,:,0]
 
         tar_mask = Image.open(tar_mask_path ).convert('P')
