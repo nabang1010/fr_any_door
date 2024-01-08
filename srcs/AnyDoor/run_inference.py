@@ -50,6 +50,9 @@ def process_pairs(ref_image, ref_mask, tar_image, tar_mask):
 
     # ref filter mask 
     ref_mask_3 = np.stack([ref_mask,ref_mask,ref_mask],-1)
+    print("ref_image.shape", ref_image.shape)
+    print("ref_mask_3.shape", ref_mask_3.shape)
+    
     masked_ref_image = ref_image * ref_mask_3 + np.ones_like(ref_image) * 255 * (1-ref_mask_3)
 
     y1,y2,x1,x2 = ref_box_yyxx
@@ -264,7 +267,7 @@ if __name__ == '__main__':
 
     test_dir = DConf.Test.VitonHDTest.image_dir
     image_names = os.listdir(test_dir)
-    
+    count = 0
     for image_name in image_names:
         ref_image_path = os.path.join(test_dir, image_name)
         print("ref_image_path", ref_image_path)
@@ -281,16 +284,36 @@ if __name__ == '__main__':
         ref_image = cv2.imread(ref_image_path)
         ref_image = cv2.cvtColor(ref_image, cv2.COLOR_BGR2RGB)
         gt_image = cv2.imread(tar_image_path)
+        # resize to same size of  ref_image
+        gt_image = cv2.resize(gt_image, (ref_image.shape[1], ref_image.shape[0]))
+        
         gt_image = cv2.cvtColor(gt_image, cv2.COLOR_BGR2RGB)
         ref_mask = (cv2.imread(ref_mask_path) > 128).astype(np.uint8)[:,:,0]
 
-        tar_mask = Image.open(tar_mask_path ).convert('P')
+
+        
+        tar_mask = Image.open(tar_mask_path).convert('P')
+        # write tar_mask to txt file
+        with open("/home/xuananh/work/nabang1010/fr_any_door/srcs/AnyDoor/VITONGEN/tar_"+ image_name + ".txt", "w") as f:
+            for i in range(tar_mask.size[1]):
+                for j in range(tar_mask.size[0]):
+                    f.write(str(tar_mask.getpixel((j,i))) + " ")
+                f.write("\n")
+        
+        
+        cv2.imwrite("/home/xuananh/work/nabang1010/fr_any_door/srcs/AnyDoor/VITONGEN/tar_"+ image_name+ ".png", np.array(tar_mask))
+        count += 1
+        # resize to same size of  ref_image
         tar_mask= np.array(tar_mask)
-        tar_mask = tar_mask == 5
+        tar_mask = cv2.resize(tar_mask, (ref_image.shape[1], ref_image.shape[0]))
+        tar_mask = tar_mask == 2
+        # save tar_mask to png file
+        tar_mask = tar_mask.astype(np.uint8) * 255
+        cv2.imwrite("/home/xuananh/work/nabang1010/fr_any_door/srcs/AnyDoor/VITONGEN/tar_mask_"+ image_name+ ".png", tar_mask)
 
         gen_image = inference_single_image(ref_image, ref_mask, gt_image.copy(), tar_mask)
         gen_path = os.path.join(save_dir, image_name)
-
+        cv2.imwrite("/home/xuananh/work/nabang1010/fr_any_door/srcs/AnyDoor/VITONGEN/demo.jpg", gen_image[:,:,::-1])
         vis_image = cv2.hconcat([ref_image, gt_image, gen_image])
         cv2.imwrite(gen_path, vis_image[:,:,::-1])
     #'''

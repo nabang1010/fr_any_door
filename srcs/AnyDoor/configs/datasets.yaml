@@ -62,7 +62,7 @@ Test:
     bg_dir: path/DreamBooth/v1_800
 
   VitonHDTest:
-    image_dir: /home/xuananh/work/nabang1010/test/cloth
+    image_dir: /home/xuananh/work/nabang1010/fr_any_door/test/cloth
 
 
 
